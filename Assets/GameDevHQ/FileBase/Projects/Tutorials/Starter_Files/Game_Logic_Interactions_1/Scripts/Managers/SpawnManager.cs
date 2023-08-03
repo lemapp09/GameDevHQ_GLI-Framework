@@ -9,16 +9,20 @@ namespace Managers
         [SerializeField] private  AI_Agent _aiPrefab;
         [SerializeField] public Pooler _objectPool;
         private Barriers _barrier;
-
+        private static SpawnManager _instance;
+        public static SpawnManager Instance { get { return _instance; } }
+    
         private void Awake() {
+            if (_instance != null && _instance != this) {
+                Destroy(this.gameObject);
+            } else {
+                _instance = this;
+            }
+
             _barrier = GameObject.FindGameObjectWithTag("Barriers").GetComponent<Barriers>();
             if (_barrier == null) {
                 Debug.LogError("Barrier not found");
             }
-        }
-        
-        void Start() {
-            Spawn();
         }
 
         public void Spawn() {
