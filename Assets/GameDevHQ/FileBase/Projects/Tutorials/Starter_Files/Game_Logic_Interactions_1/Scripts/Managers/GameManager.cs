@@ -20,6 +20,7 @@ public class GameManager : MonoBehaviour
     [SerializeField]
     public int _numberOfAIRespawn = 0;
     public int _ammo = 100;
+    private bool _isGameOver;
     
     private void Awake() {
         if (_instance != null && _instance != this) {
@@ -42,33 +43,44 @@ public class GameManager : MonoBehaviour
         if ( !_isDangerTime && _timeInGame >= _timeAllowedInGame * 0.6667f ) { 
             UIManager.Instance.DangerTime();
         }
-        // ------ Win ----
-        if (_killCount == _numberOfKillsToWin) {
-            GameWon();
-        }
-        // ------ Lose ----
 
-        if (_ammo == 0 ) {
-            GameLost();
-        }
+        if (!_isGameOver)
+        {
+            // ------ Win ----
+            if (_killCount >= _numberOfKillsToWin)
+            {
+                GameWon();
+            }
+            // ------ Lose ----
 
-        if (_timeInGame >= _timeAllowedInGame) {
-            UIManager.Instance.OutOfTime();
-            GameLost();
-        }
-        
-        if (_numberOfAIRespawn  > ( _numberOfKillsToWin / 2 )) {
-            GameLost();
-        }
+            if (_ammo == 0)
+            {
+                GameLost();
+            }
 
+            if (_timeInGame >= _timeAllowedInGame)
+            {
+                UIManager.Instance.OutOfTime();
+                GameLost();
+            }
+
+            if (_numberOfAIRespawn > (_numberOfKillsToWin / 2))
+            {
+                GameLost();
+            }
+        }
     }
 
-    private void GameLost() {
+    private void GameLost()
+    {
+        _isGameOver = true;
         UIManager.Instance.GameLost();
         Actions.GameOver();
     }
 
-    private void GameWon() {
+    private void GameWon()
+    {
+        _isGameOver = false;
         UIManager.Instance.GameWon();
         Actions.GameOver();
     }

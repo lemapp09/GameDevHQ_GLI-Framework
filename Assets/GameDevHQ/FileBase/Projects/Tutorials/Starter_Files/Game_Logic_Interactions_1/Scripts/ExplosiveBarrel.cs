@@ -1,18 +1,28 @@
 using System.Collections;
-using System.Collections.Generic;
+using GLI_Framework;
 using UnityEngine;
 
 public class ExplosiveBarrel : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
+    [SerializeField] private GameObject _explosion;
+
+    public void explosion()
     {
-        
+        StartCoroutine(explosionCoroutine());
+        Collider[] hitColliders = Physics.OverlapSphere(this.transform.position, 20f, 1 << 6);
+        foreach (var hitCollider in hitColliders) {
+            if (hitCollider.CompareTag("AI_Agent")) {
+                    hitCollider.GetComponent<AI_Agent>().Death();
+            }
+        }
     }
 
-    // Update is called once per frame
-    void Update()
+    private IEnumerator explosionCoroutine()
     {
-        
+        this.GetComponent<MeshRenderer>().enabled = false;
+        this.GetComponent<Collider>().enabled = false;
+        _explosion.SetActive(true);
+        yield return new WaitForSeconds(1.5f);
+        _explosion.SetActive(false);
     }
 }

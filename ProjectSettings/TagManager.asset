@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Barriers
   - AI_Agent
+  - Barrels
   layers:
   - Default
   - TransparentFX

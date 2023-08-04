@@ -31,6 +31,9 @@ public class Player : MonoBehaviour
                     }  else if (hitInfo.collider.GetComponent<ForceBarriers>()) {
                         AudioManager.Instance.PlayShotBarrier();
                         hitInfo.collider.GetComponent<ForceBarriers>().Deactive();
+                    } else if (hitInfo.collider.CompareTag("Barrels"))
+                    {
+                        hitInfo.collider.GetComponent<ExplosiveBarrel>().explosion();
                     }
                 }
             }
