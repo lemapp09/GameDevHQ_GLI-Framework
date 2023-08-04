@@ -23,7 +23,7 @@ namespace GLI_Framework
         private Barriers _barrier;
         [Range(1,19)]
         [SerializeField]
-        private int _currentBarrier = 1;
+        public int _currentBarrier = 1;
         private AI_States _currentState = AI_States.Run;
         
         void Awake() {
@@ -37,36 +37,61 @@ namespace GLI_Framework
 
         private void OnEnable()
         {
-            this.transform.position = _barrier._barriers[0].transform.position;
+            _currentBarrier = Random.Range(0, _barrier._barriers.Length - 2 );
+            this.transform.position = _barrier._barriers[_currentBarrier].transform.position;
             _agent = this.GetComponent<NavMeshAgent>();
             _agent.enabled = true;
-            _agent.SetDestination(_barrier._barriers[1].transform.position);
+            _agent.speed = Random.Range(1f, 2f);
+            _agent.SetDestination(_barrier._barriers[_currentBarrier + 1].transform.position);
+            Actions.GameOver += GameOver;
+        }
+
+        private void GameOver()
+        {
+           ReturnToPool();
         }
 
         private void Update() {
             if (_currentState == AI_States.Run) {
-                if (_agent.remainingDistance < .05f)
-                {
+                if (_agent.remainingDistance < .05f) {
                     StartCoroutine(Hiding());
                     _currentBarrier++;
-                    if (_currentBarrier < _barrier._barriers.Length)
-                    {
+                    if (_currentBarrier < _barrier._barriers.Length - 1) {
                         _agent.SetDestination(_barrier._barriers[_currentBarrier].transform.position);
-                    }
-                    else
-                    {
-                        var PoolInstance = GetComponent<Instance>();
-                        if (PoolInstance != null)
-                        {
-                            if (PoolInstance.GetPoolerOrigin() != null)
-                            {
-                                PoolInstance.Despawn();
-                            }
-                        }
+                    }  else {
+                        ReturnToPool();
                     }
                 }
+                if(_agent.velocity.magnitude < 0.1f)
+                    _currentBarrier++;
             }
             _anim.SetFloat("Speed", _agent.velocity.magnitude);
+            Collider[] hitColliders = Physics.OverlapSphere(this.transform.position, 2f, 1 << 6);
+            foreach (var hitCollider in hitColliders)
+            {
+                if (hitCollider.CompareTag("AI_Agent")) {
+                    if (Random.value > 0.5f) {
+                        _currentBarrier += 1;
+                    } else {
+                        _currentBarrier -= 1;
+                    }
+                    if (_currentBarrier <= 1) _currentBarrier = 1;
+                    if (_currentBarrier >= _barrier._barriers.Length) _currentBarrier = _barrier._barriers.Length - 2;
+                    break;
+                }
+            }
+        }
+
+        public void ReturnToPool()
+        {
+            var PoolInstance = GetComponent<Instance>();
+            if (PoolInstance != null) {
+                if (PoolInstance.GetPoolerOrigin() != null) {
+                    AudioManager.Instance.PlayAIComplete();
+                    GameManager.Instance.AIRespawned();
+                    PoolInstance.Despawn();
+                }
+            }
         }
         
         private IEnumerator Hiding() {
@@ -84,7 +109,7 @@ namespace GLI_Framework
             _anim.SetBool("Death" , true);
             _currentState = AI_States.Death;
             _agent.enabled = false;
-            GameManager.Instance.AddScore(50);
+            GameManager.Instance.AIAgentDeath(50);
             StartCoroutine(DeathDelay());
         }
 
@@ -97,6 +122,10 @@ namespace GLI_Framework
                     PoolInstance.Despawn();
                 }
             }
+        }
+
+        private void OnDisable() {
+            Actions.GameOver -= GameOver;
         }
     }
 }

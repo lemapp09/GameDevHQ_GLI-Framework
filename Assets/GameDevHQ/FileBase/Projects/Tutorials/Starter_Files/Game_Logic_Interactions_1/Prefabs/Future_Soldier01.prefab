@@ -1642,7 +1642,7 @@ GameObject:
   - component: {fileID: 6425146063202317690}
   m_Layer: 6
   m_Name: Future_Soldier01
-  m_TagString: Untagged
+  m_TagString: AI_Agent
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0

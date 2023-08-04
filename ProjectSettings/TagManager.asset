@@ -5,6 +5,7 @@ TagManager:
   serializedVersion: 2
   tags:
   - Barriers
+  - AI_Agent
   layers:
   - Default
   - TransparentFX
